@@ -1,8 +1,6 @@
-![alt text](resources/images/anglerfish.png)
+# FISHsim (Multiplexed Spots Simulator)
 
-# Anglerfish Simulator
-
-This is a simulation software that generated realistic images of flourescent probes.
+This is a simulation software that generates photorealistic images of flourescent probes.
 
 ## Installation
 We recommend using conda to set up a virtual environment. 
@@ -23,7 +21,7 @@ Some parameters can also be set using the Command Line Interface. This overrides
 ## Program Usage
 
 ## Running as an installed package
-If you have installed anglerfish_simulator as a package, then
+If you have installed fishsim as a package, then
 
 1. Update the parameters in resources\configs\config.yml
 
