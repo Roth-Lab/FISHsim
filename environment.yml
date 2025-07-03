@@ -1,4 +1,4 @@
-name: anglerfish_simulator
+name: fishsim
 channels:
   - conda-forge
 dependencies:

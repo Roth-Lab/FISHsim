@@ -1,8 +1,8 @@
 from setuptools import find_packages, setup
 
 setup(
-    name='anglerfish-simulator',
-    version='0.9.0',
+    name='fishsim',
+    version='1.0.0',
     author='Jenkin Tsui, William Choi, Luna Liu',
     author_email='jenkin.tsui@aya.yale.edu',
     description='A simulator for barcoding images',
@@ -21,7 +21,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'fishsim = anglerfish_simulator.cli:main',
+            'fishsim = fishsim.cli:main',
         ],
     },
 )
