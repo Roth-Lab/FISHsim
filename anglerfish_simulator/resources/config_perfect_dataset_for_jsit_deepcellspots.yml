@@ -1,0 +1,64 @@
+simulation:
+  tile_count: 1
+  emitter_count: 5000
+  image_size: 1600
+  signal_wavelengths:
+    - 650
+    - 750
+  scr: [11, 11, 11, 11, 11, 11, 11, 11] # signal-to-cell-background ratio
+  photon_count: [20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000]
+  bitdrop_probability: 0. # probability of a bit being dropped (dropout)
+  bitadd_probability: 0. # probability of a bit being added (miscall)
+  background_sampling_probability: 0. # 0 ~ 1 value that indicates the probablity of each pixel contributing to the background
+  is_cell: false
+  is_matlab: true
+  is_subpixel: false
+  is_nucleus: false
+  z_bound:
+    - -7 # lower
+    - 7 # upper
+
+  cells:
+    count: 60
+    # half of the principal axis
+    axes: # pixels (min, max)
+      a:
+        - 30 # min
+        - 40 # max
+      b:
+        - 60 # min
+        - 70 # max
+      c:
+        - 50 # min
+        - 60 # max
+
+data: # Specify path from the base project directory
+  psf:
+    matlab: resources/PSF.mat
+    python: resources/psf
+
+  codebook:
+    c1e1: resources/codebooks/C1E1_codebook_random_distribution_emittercount5000.csv
+
+  data_organization: resources/data_organizations/data_organization.csv
+
+cameras:
+  Prime95B:
+    qe:
+      "473": 0.87
+      "561": 0.95
+      "650": 0.89
+      "750": 0.71
+    gain: 1.33
+    bias: 100
+    dark_current: 0.
+    read_noise: 1. # rms
+    sensor_size: 25 # diagonal (mm)
+    well_depth: 80000 # (num e-)/pixel
+    exposure_times: # in seconds
+        "650": 2.0
+        "750": 2.0
+
+optics:
+  NikonTi2:
+    magnification: 60

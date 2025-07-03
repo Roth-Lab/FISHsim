@@ -1,0 +1,59 @@
+simulation:
+  tile_count: 10
+  emitter_count: 35000
+  image_size: 1600
+  signal_wavelengths:
+    - 650
+    - 561
+  scr: 11 # signal-to-cell-background ratio
+  photon_count: 4000
+  bitdrop_probability: 0 # probability of a bit being dropped (dropout)
+  bitadd_probability: 0 # probability of a bit being added (miscall)
+  is_cell: false
+  is_matlab: true
+  is_subpixel: false
+  is_nucleus: false
+  z_bound:
+    - -2 # lower
+    - 2 # upper
+
+  cells:
+    count: 3 
+    # half of the principal axis
+    axes: # pixels (min, max)
+      a:
+        - 30 # min
+        - 40 # max
+      b:
+        - 60 # min
+        - 70 # max
+      c:
+        - 50 # min
+        - 60 # max
+
+data: # Specify path from the base project directory
+  psf:
+    matlab: resources/PSF.mat
+    python: resources/psf
+
+  codebook:
+    c1e1: resources/codebook_xp7049.csv
+
+  data_organization: resources/data_organization_xp7049.csv
+
+cameras:
+  Prime95B:
+    qe:
+      "473": 0.87
+      "000": 0.95
+      "650": 0.89
+      "561": 0.94
+    gain: 0.85
+    bias: 100
+    dark_current: 0
+    read_noise: 1.8 # rms
+    sensor_size: 25 # diagonal (mm)
+
+optics:
+  NikonTi2:
+    magnification: 60
