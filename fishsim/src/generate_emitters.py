@@ -94,5 +94,79 @@ def cell_emitter_position(
     return emitter_positions, cells
 
 
+
+def enforce_min_center_distance(
+    emitter_pos: np.ndarray,
+    min_dist: float = 6.0,
+    max_tries: int = 100000,
+    x_dim: tuple = None,
+    y_dim: tuple = None,
+    z_dim: tuple = None,
+) -> np.ndarray:
+    """
+    Enforce that all emitters are at least `min_dist` pixels apart
+    in XY center-to-center distance.
+
+    This uses rejection + resampling.
+
+    Assumes emitter_pos has shape (N, 3) with columns [x, y, z].
+    Spacing is checked in the XY plane only.
+    """
+
+    if len(emitter_pos) == 0:
+        return emitter_pos
+
+    if x_dim is None or y_dim is None or z_dim is None:
+        raise ValueError("x_dim, y_dim, and z_dim must be provided for resampling.")
+
+    accepted = []
+
+    def is_valid(candidate, accepted_points):
+        cx = int(candidate[0])
+        cy = int(candidate[1])
+
+        for pt in accepted_points:
+            px = int(pt[0])
+            py = int(pt[1])
+
+            dist = ((cx - px) ** 2 + (cy - py) ** 2) ** 0.5
+            if dist < min_dist:
+                return False
+
+        return True
+
+    def sample_new_point():
+        return np.array([
+            np.random.uniform(x_dim[0], x_dim[1]),
+            np.random.uniform(y_dim[0], y_dim[1]),
+            np.random.uniform(z_dim[0], z_dim[1]),
+        ])
+
+    for pt in emitter_pos:
+        if is_valid(pt, accepted):
+            accepted.append(pt)
+            continue
+
+        placed = False
+        for _ in range(max_tries):
+            new_pt = sample_new_point()
+
+            # If you're enforcing spacing after floor() in simulation.py,
+            # keep the resampled point on the same integer grid too.
+            new_pt[:2] = np.floor(new_pt[:2])
+
+            if is_valid(new_pt, accepted):
+                accepted.append(new_pt)
+                placed = True
+                break
+
+        if not placed:
+            raise RuntimeError(
+                "Could not place all emitters with the requested minimum center distance. "
+                "Reduce emitter density or spacing threshold."
+            )
+
+    return np.asarray(accepted)
+
 if __name__ == "__main__":
     pass

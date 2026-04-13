@@ -13,7 +13,7 @@ import scipy.signal
 import skimage.io
 import matplotlib.pyplot as plt
 
-from .generate_emitters import cell_emitter_position, random_emitter_position
+from .generate_emitters import cell_emitter_position, random_emitter_position, enforce_min_center_distance
 from .sparse import SparseMatrix3D, sparse_convolve3d
 from .utils import BASE_PROJECT_DIR, glob_background, trunc_norm
 
@@ -276,6 +276,18 @@ class Simulator(object):
 
         if not is_subpixel:
             emitter_pos = np.floor(emitter_pos)
+
+        # Enforce spacing to prevent transcripts overlapping (on the same X,Y coordinates)
+        emitter_pos = enforce_min_center_distance(
+            emitter_pos,
+            min_dist=6.0,
+            x_dim=(0, self.image_size),
+            y_dim=(0, self.image_size),
+            z_dim=(
+                math.floor(psf.shape[2] / 2) + z_bound[0],
+                math.floor(psf.shape[2] / 2) + z_bound[1],
+            ),
+        )
 
         # Crate a goundtruth data frame
         ground_truth = []
