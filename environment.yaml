@@ -2,17 +2,10 @@ name: fishsim
 channels:
   - conda-forge
 dependencies:
-  - python=3.7
+  - python>=3.12
+  - click
   - numpy
   - pandas
-  - pickle5
+  - pyyaml
   - scipy
   - scikit-image
-  - click
-  - pyyaml
-  - black
-  - pytest
-  - pathlib
-  - seaborn
-  - python-opencv
-  - scikit-learn

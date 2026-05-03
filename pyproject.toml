@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "FISHsim"
+authors = [
+    { name = "Jenkin Tsui", email = "jenkin.tsui@aya.yale.edu" },
+    { name = "William Choi" },
+    { name = "Luna Liu" }
+]
+maintainers = [
+    { name = "Jenkin Tsui", email = "jenkin.tsui@aya.yale.edu" }
+]
+description = "A simulator for multiplex FISH images"
+version = "1.1.0"
+requires-python = ">=3.12"
+classifiers = ["Private :: Do Not Upload", "Development Status :: 4 - Beta", "Programming Language :: Python :: 3.12"]
+dependencies = [
+    "click",
+    "numpy",
+    "pandas",
+    "pyyaml",
+    "scipy",
+    "scikit-image",
+]
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+py_version = 312
+from_first = true
+lines_between_types = 1
+
+[project.scripts]
+fishsim = "fishsim.cli:main"
+
+[tool.setuptools.packages.find]
+exclude = ["sandbox"]
+
+[tool.setuptools.package-data]
+"fishsim.resources" = ["psf.mat"]
