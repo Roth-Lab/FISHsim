@@ -39,7 +39,7 @@ cell = cells.EllipsoidCell(
 # )
 # cell.R = cell.shape.R
 cell.generate_emitters(1000)
-major, minor, center = cell.shape.project()
+major, minor, center = cell.shape.projection()
 print(major)
 img = cell.background(20000 / 10)
 

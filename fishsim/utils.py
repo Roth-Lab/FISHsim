@@ -1,15 +1,17 @@
+from pathlib import Path
+from typing import Callable
+
 import math
 import random
-from re import I
+
+from scipy.ndimage import gaussian_filter
+from scipy.stats import truncnorm
+
 import numpy as np
 import numpy.linalg as LA
 import pandas as pd
-from scipy.stats import truncnorm
-from scipy.ndimage import gaussian_filter
-from typing import Callable
-from pathlib import Path
-import sys
-from .sparse import SparseMatrix3D, sparse_convolve2d
+
+from fishsim.sparse import SparseMatrix3D, sparse_convolve2d
 
 BASE_PROJECT_DIR = Path(__file__).resolve().parents[1].absolute()
 
@@ -82,18 +84,18 @@ def make_gaussian_2d(
     outer_extent: float = None,
     smoothing: float = 0,
 ) -> np.ndarray:
-    """ Creates a 2D gaussian image
+    """Creates a 2D gaussian image
 
-        Args:
-            std (list): standard deviation in the form [a, b]
-            shape (tuple): shape of the returned image in the form (rows, cols)
-            rot (float): rotation to be applied to the gaussian in RADs
-            inner_extent (float): fraction of the standard deviation
-            outer_extent (float): fraction of the standard deviation
-            smoothing (float): sigma of the gaussian kernel used for smoothing
+    Args:
+        std (list): standard deviation in the form [a, b]
+        shape (tuple): shape of the returned image in the form (rows, cols)
+        rot (float): rotation to be applied to the gaussian in RADs
+        inner_extent (float): fraction of the standard deviation
+        outer_extent (float): fraction of the standard deviation
+        smoothing (float): sigma of the gaussian kernel used for smoothing
 
-        Returns:
-            gaussian image: 2D gaussian image (not scaled)
+    Returns:
+        gaussian image: 2D gaussian image (not scaled)
 
     """
 
@@ -105,13 +107,13 @@ def make_gaussian_2d(
     R = np.array([[np.cos(rot), -np.sin(rot)], [np.sin(rot), np.cos(rot)]])
     if inner_extent is not None:
         inner_axes = np.array(std) * inner_extent
-        inner_V = np.diag(1 / inner_axes ** 2)  # ellipse matrix w/o rotation
+        inner_V = np.diag(1 / inner_axes**2)  # ellipse matrix w/o rotation
         inner_V = R @ inner_V @ R.T  # ellipse matrix w/ rotation applied
         inner_floor = f(R @ np.array([std[0] * inner_extent, 0])) * 0.4
 
     if outer_extent is not None:
         outer_axes = np.array(std) * outer_extent
-        outer_V = np.diag(1 / outer_axes ** 2)  # ellipse matrix w/o rotation
+        outer_V = np.diag(1 / outer_axes**2)  # ellipse matrix w/o rotation
         outer_V = R @ outer_V @ R.T  # ellipse matrix w/ rotation applied
 
     img = np.zeros(shape)
@@ -134,13 +136,13 @@ def make_gaussian_2d(
 
 
 def gaussian_2d(std: list, rot: float) -> Callable[[np.ndarray], float]:
-    """ Creates a 2D gaussian fucntion
-        Args: 
-            std (list): standard deviations of the gaussian [sigma_1, sigma_2]
-            rot (float): rotation angle in radians
-        
-        Returns:
-            2D gaussian function
+    """Creates a 2D gaussian fucntion
+    Args:
+        std (list): standard deviations of the gaussian [sigma_1, sigma_2]
+        rot (float): rotation angle in radians
+
+    Returns:
+        2D gaussian function
     """
     V = np.diag(np.array(std) ** 2)  # covariance matrix w/o rotation
     R = np.array([[np.cos(rot), -np.sin(rot)], [np.sin(rot), np.cos(rot)]])
@@ -153,19 +155,19 @@ def gaussian_2d(std: list, rot: float) -> Callable[[np.ndarray], float]:
 
 
 def glob_background(shape: tuple, sampling_prob: float, bg_lvl: float) -> np.ndarray:
-    """ Creates an image with randomly sampled gaussian noise
+    """Creates an image with randomly sampled gaussian noise
 
-        Args:
-            shape (tuple): size of the resulting image
-            sampling_prob (float): 0 ~ 1 value that indicates the probablity of each pixel contributing to the background
-            bg_lvl (float): image will be scaled such that the mean is equal to the bg_lvl
+    Args:
+        shape (tuple): size of the resulting image
+        sampling_prob (float): 0 ~ 1 value that indicates the probablity of each pixel contributing to the background
+        bg_lvl (float): image will be scaled such that the mean is equal to the bg_lvl
 
-        Returns:
-            background_image: image with randomly sampled gaussian noise
+    Returns:
+        background_image: image with randomly sampled gaussian noise
     """
     # Make the gaussian kernel
     std = [10, 10]
-    kernel_shape = (75, 75)  # choose odd number
+    kernel_shape = (75, 75)  # rvs odd number
     kernel = make_gaussian_2d(std, kernel_shape)
 
     # Create a sparse matrix that represents the background
@@ -173,9 +175,7 @@ def glob_background(shape: tuple, sampling_prob: float, bg_lvl: float) -> np.nda
     cnt = np.random.binomial(shape[0] * shape[1], sampling_prob)
     r = np.random.randint(0, shape[0], size=(cnt, 1))
     c = np.random.randint(0, shape[1], size=(cnt, 1))
-    background_sparse = SparseMatrix3D(
-        np.ones((cnt, 1)), np.hstack((r, c)), shape, subpixel=False
-    )
+    background_sparse = SparseMatrix3D(np.ones((cnt, 1)), np.hstack((r, c)), shape, subpixel=False)
 
     # Convolve the kernel with the background
     background = sparse_convolve2d(background_sparse, kernel)
@@ -184,36 +184,36 @@ def glob_background(shape: tuple, sampling_prob: float, bg_lvl: float) -> np.nda
     return background
 
 
-class trunc_norm:
+class TruncatedNormal:
     """
-        Sytactic sugar to create truncated normal distribution using scipy.stats.truncnorm
-        Args:
-            a (int): lower bound of distribution
-            b (int): upper bound of distribution
-            mean (int): mean of normal distribution
-            var (int): std deviation of distribution
-        Methods:
-            choose()
-                returns a random variable from the specified distribution
+    Sytactic sugar to create truncated normal distribution using scipy.stats.truncnorm
+    Args:
+        a (int): lower bound of distribution
+        b (int): upper bound of distribution
+        mean (int): mean of normal distribution
+        var (int): std deviation of distribution
+    Methods:
+        rvs()
+            returns a random variable from the specified distribution
     """
-    def __init__(self, a:np.uint16, b:np.uint16, mean:np.uint16=50, var:np.uint16=100):
-        self.mean=mean
-        self.var=var
+
+    def __init__(self, a: np.uint16, b: np.uint16, mean: np.uint16 = 50, var: np.uint16 = 100):
+        self.mean = mean
+        self.var = var
         """
             These need to be general normal distributions
             scipy does not use the entire truncated normal distribution formula
             they plug these numbers directly into the bottom half
         """
-        self.lower=(a-self.mean)/self.var
-        self.upper=(b-self.mean)/self.var
-        
-        
+        self.lower = (a - self.mean) / self.var
+        self.upper = (b - self.mean) / self.var
 
-    def choose(self,num:int=1) -> int:
-        return truncnorm.rvs(self.lower,self.upper,loc=self.mean,scale=self.var,size=num)
+    def rvs(self, num: int = 1) -> int:
+        return truncnorm.rvs(self.lower, self.upper, loc=self.mean, scale=self.var, size=num)
+
     @staticmethod
-    def choose_from_array(means,a:np.uint16=0,b:np.uint16=80000,var:int=20):
-        return np.array([trunc_norm(a,b,mean=mean,var=mean/var).choose() for mean in means])
+    def choose_from_array(means, a: np.uint16 = 0, b: np.uint16 = 80000, var: int = 20):
+        return np.array([TruncatedNormal(a, b, mean=mean, var=mean / var).rvs() for mean in means])
 
 
 if __name__ == "__main__":

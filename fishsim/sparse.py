@@ -6,9 +6,7 @@ from scipy import interpolate
 class SparseMatrix3D:
     """Representation of a 3-dimensional sparse matrix in COO format"""
 
-    def __init__(
-        self, data: np.ndarray, indexes: np.ndarray, shape: tuple, subpixel: bool = True
-    ):
+    def __init__(self, data: np.ndarray, indexes: np.ndarray, shape: tuple, subpixel: bool = True):
         """Creates an instance of sparse matrix
 
         Args:
@@ -24,8 +22,8 @@ class SparseMatrix3D:
 
 
 def sparse_convolve2d(input_matrix: SparseMatrix3D, kernel: np.ndarray) -> np.ndarray:
-    """ Takes a sparse matrix and applies 2d convolution 
-        Note: this function does not support subpixel 
+    """Takes a sparse matrix and applies 2d convolution
+    Note: this function does not support subpixel
     """
 
     N, M = input_matrix.shape
@@ -52,15 +50,11 @@ def sparse_convolve2d(input_matrix: SparseMatrix3D, kernel: np.ndarray) -> np.nd
 
         tl = np.array([index[0] - math.floor(n / 2), index[1] - math.floor(m / 2)])
 
-        output[rl:ru, cl:cu] += (
-            kernel[rl_k - tl[0] : ru_k - tl[0], cl_k - tl[1] : cu_k - tl[1]] * val
-        )
+        output[rl:ru, cl:cu] += kernel[rl_k - tl[0] : ru_k - tl[0], cl_k - tl[1] : cu_k - tl[1]] * val
         cnt += 1
 
     # Returning the output minus the padding
-    return output[
-        math.floor(n / 2) : -math.floor(n / 2), math.floor(m / 2) : -math.floor(m / 2)
-    ]
+    return output[math.floor(n / 2) : -math.floor(n / 2), math.floor(m / 2) : -math.floor(m / 2)]
 
 
 def sparse_convolve3d(input_matrix: SparseMatrix3D, kernel: np.ndarray) -> np.ndarray:
@@ -91,41 +85,29 @@ def sparse_convolve3d(input_matrix: SparseMatrix3D, kernel: np.ndarray) -> np.nd
 
         if input_matrix.subpixel is True:
             # Z-interpolation (bi-lienar spline)
-            section_bottom = (
-                kernel[:, :, mid_z_index - (math.floor(index[2]) - mid_z_index)] * val
-            )
-            section_top = (
-                kernel[:, :, mid_z_index - (math.ceil(index[2]) - mid_z_index)] * val
-            )
-            weight = index[2] % 1 #Get the floating point value
-            section = (1 - weight) * section_bottom + weight * section_top #section that you want to interpolate
+            section_bottom = kernel[:, :, mid_z_index - (math.floor(index[2]) - mid_z_index)] * val
+            section_top = kernel[:, :, mid_z_index - (math.ceil(index[2]) - mid_z_index)] * val
+            weight = index[2] % 1  # Get the floating point value
+            section = (1 - weight) * section_bottom + weight * section_top  # section that you want to interpolate
 
             # XY-interpolation (bi-cubic spline)
             rows = list(range(section.shape[0]))
             cols = list(range(section.shape[1]))
-            #f is a function
+            # f is a function
             f = interpolate.RectBivariateSpline(rows, cols, section)
 
             x_shift = index[0] % 1
             y_shift = index[1] % 1
-            rows_shifted = np.linspace(
-                x_shift, section.shape[0] - 1 + x_shift, section.shape[0]
-            )
-            cols_shifted = np.linspace(
-                y_shift, section.shape[1] - 1 + y_shift, section.shape[1]
-            )
+            rows_shifted = np.linspace(x_shift, section.shape[0] - 1 + x_shift, section.shape[0])
+            cols_shifted = np.linspace(y_shift, section.shape[1] - 1 + y_shift, section.shape[1])
             section = f(rows_shifted, cols_shifted)
         else:
             section = kernel[:, :, mid_z_index - (index[2] - mid_z_index)] * val
 
         # Assigning the output matrix with the corresponding kernel section
         output[
-            index[0]
-            - math.floor(section.shape[1] / 2) : index[0]
-            + math.ceil(section.shape[1] / 2),
-            index[1]
-            - math.floor(section.shape[0] / 2) : index[1]
-            + math.ceil(section.shape[0] / 2),
+            index[0] - math.floor(section.shape[1] / 2) : index[0] + math.ceil(section.shape[1] / 2),
+            index[1] - math.floor(section.shape[0] / 2) : index[1] + math.ceil(section.shape[0] / 2),
         ] += section
         count += 1
 
