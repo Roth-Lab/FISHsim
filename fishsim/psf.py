@@ -1,7 +1,22 @@
+import importlib.resources
+
 import numpy as np
+import scipy.io
+
+import fishsim.resources
 
 
-def process_psf(psf):
+def load_psf():
+    resource_dir = importlib.resources.files(fishsim.resources)
+
+    psf_file = resource_dir.joinpath("psf.mat")
+
+    psf = np.array(scipy.io.loadmat(psf_file)["ans"])
+
+    return _process_psf(psf)
+
+
+def _process_psf(psf):
     psf = psf.astype(np.float64)
 
     psf = psf / np.sum(psf)

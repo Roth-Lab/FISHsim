@@ -1,18 +1,12 @@
 import numpy as np
-import pandas as pd
 
 
 class Codebook(object):
-    @staticmethod
-    def from_file(file_name):
-        df = pd.read_csv(file_name)
-
-        return Codebook(df)
-
     def __init__(self, df):
         self.df = df
 
-        self.df = self.df.set_index("target")
+        if "target" in self.df.columns:
+            self.df = self.df.set_index("target")
 
         if "dist" in self.df:
             self.target_dist = self.df["dist"].values

@@ -3,7 +3,7 @@ import pickle
 from fishsim.codebook import Codebook
 from fishsim.data_organisation import DataOrganisation
 from fishsim.fov import FieldOfView, ProbedFieldOfView
-from fishsim.psf import process_psf
+from fishsim.psf import _process_psf
 from fishsim.simulate import BackgroundSimulator, CameraSimulator, PhotonSimulator
 
 import matplotlib.pyplot as pp
@@ -12,7 +12,7 @@ import pandas as pd
 import scipy.io
 import skimage.io
 
-psf_file = "../fishsim/resources/PSF.mat"
+psf_file = "../fishsim/resources/psf.mat"
 
 psf = np.array(scipy.io.loadmat(psf_file)["ans"])
 
@@ -22,7 +22,7 @@ c = psf.shape[2] // 2
 #
 # pp.show()
 #
-psf = process_psf(psf)
+psf = _process_psf(psf)
 
 # pp.imshow(psf[:, :, c])
 #
@@ -64,10 +64,10 @@ probed_fov = ProbedFieldOfView(
 
 data_org_df = pd.DataFrame(
     [
-        {"bit_id": "bit_1", "channel": "650", "round": 0},
-        {"bit_id": "bit_2", "channel": "750", "round": 0},
-        {"bit_id": "bit_3", "channel": "650", "round": 1},
-        {"bit_id": "bit_4", "channel": "750", "round": 1},
+        {"bit_id": "bit_1", "bit_number": 1, "channel": "650", "imaging_round": 0},
+        {"bit_id": "bit_2", "bit_number": 2, "channel": "750", "imaging_round": 0},
+        {"bit_id": "bit_3", "bit_number": 3, "channel": "650", "imaging_round": 1},
+        {"bit_id": "bit_4", "bit_number": 4, "channel": "750", "imaging_round": 1},
     ]
 )
 
@@ -121,10 +121,7 @@ sim_camera = CameraSimulator(
 
 img = sim_camera.capture_img(data_org.get_channel("bit_1"), img)
 
-pp.imshow(img)
-
-pp.show()
 
 # pp.savefig("/home/andrew/Desktop/sim.png", dpi=1200)
 
-# skimage.io.imsave("/home/andrew/Desktop/sim.tiff", img)
+skimage.io.imsave("/home/andrew/Desktop/sim.tif", img.astype(np.uint16))

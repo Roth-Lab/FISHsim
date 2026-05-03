@@ -1,81 +1,7 @@
 import numpy as np
-import skimage
 
-from fishsim.codebook import Codebook
-from fishsim.data_organisation import DataOrganisation
-from fishsim.fov import FieldOfView, ProbedFieldOfView
 from fishsim.sparse import sparse_convolve2d, sparse_convolve3d, SparseMatrix3D
 from fishsim.utils import make_gaussian_2d, TruncatedNormal
-
-
-def simulate_image_stack(config, out_file):
-    config_data = config["data"]
-
-    psf = load_psf(config)
-
-    codebook = Codebook.from_file(config_data["codebook"])
-
-    data_org = DataOrganisation.from_file(config_data["data_organisation"])
-
-    probed_fov = _load_fov(codebook, config)
-
-    sim = _load_simulator(config, data_org, psf)
-
-    imgs = []
-
-    for bit in codebook.bits:
-        imgs.append(sim.get_bit_img(bit, probed_fov))
-
-    imgs = np.array(imgs)
-
-    skimage.io.imsave(out_file, imgs)
-
-
-def _load_fov(codebook, config):
-    config = config["simulation"]
-
-    boundary_box = {
-        "x": (0, config["image_size"]),
-        "y": (0, config["image_size"]),
-        "z": (config["z_bound"][0], config["z_bound"][1]),
-    }
-
-    fov = FieldOfView(boundary_box, config["cell"]["axes"], config["cells"]["count"])
-
-    return ProbedFieldOfView(
-        codebook,
-        fov,
-        config["emitter_count"],
-        bit_add_prob=config["bitadd_probability"],
-        bit_drop_prob=config["bitdrop_probability"],
-        sim_nucleus=config["is_nucleus"],
-    )
-
-
-def _load_simulator(config, data_org, psf):
-    config_camera = config["camera"]
-
-    config_sim = config["simulation"]
-
-    sim_background = BackgroundSimulator(
-        config_sim["background_sampling_probability"], config_sim["photon_count"], config_sim["scr"]
-    )
-
-    sim_photon = PhotonSimulator(
-        config_sim["photon_count"], psf, config_camera["well_depth"], subpixel=config_sim["is_subpixel"]
-    )
-
-    sim_camera = CameraSimulator(
-        config_camera["bias"],
-        config_camera["dark_current"],
-        config_camera["exposure_time"],
-        config_camera["gain"],
-        config_camera["quantum_efficiency"],
-        config_camera["read_noise"],
-        threshold_dark_current=config_camera.get("threshold_dark_current", True),
-    )
-
-    return ImageSimulator(data_org, sim_background, sim_camera, sim_photon)
 
 
 class ImageSimulator(object):
@@ -99,11 +25,15 @@ class ImageSimulator(object):
     def get_bit_img(self, bit, probed_fov):
         img_round = self.data_org.get_round(bit)
 
-        img = self.sim_background.get_img(probed_fov.fov)
+        img = self.sim_background.get_img(probed_fov.fov, img_round)
 
-        img += self.sim_photon.get_img(bit, img_round, probed_fov)
+        bit_num = self.data_org.get_bit_number(bit)
 
-        return self.sim_camera.capture_img(img)
+        img += self.sim_photon.get_img(bit_num, img_round, probed_fov)
+
+        channel = self.data_org.get_channel(bit)
+
+        return self.sim_camera.capture_img(channel, img)
 
 
 class BackgroundSimulator(object):

@@ -1,17 +1,11 @@
-import pandas as pd
-
-
 class DataOrganisation(object):
-    @staticmethod
-    def from_file(file_name):
-        df = pd.read_csv(file_name, converters={"bitNumber": int, "imagingRound": int})
-
-        return DataOrganisation(df)
-
     def __init__(self, df):
-        self.df = df
+        self.df = df.sort_values(by="bit_number")
 
         self.df = self.df.set_index("bit_id")
+
+        # Ensure imaging rounds are 0 based
+        self.df["imaging_round"] = self.df["imaging_round"] - self.df["imaging_round"].min()
 
     @property
     def bit_ids(self):
@@ -23,14 +17,17 @@ class DataOrganisation(object):
 
     @property
     def num_rounds(self):
-        return self.df["round"].nunique()
+        return self.df["imaging_round"].nunique()
 
     @property
     def rounds(self):
-        return sorted(self.df["round"].unique())
+        return sorted(self.df["imaging_round"].unique())
+
+    def get_bit_number(self, bit):
+        return self.bit_ids.index(bit)
 
     def get_channel(self, bit):
-        return self.df.at[bit, "channel"]
+        return str(self.df.at[bit, "channel"])
 
     def get_round(self, bit):
-        return self.df.at[bit, "round"]
+        return self.df.at[bit, "imaging_round"]

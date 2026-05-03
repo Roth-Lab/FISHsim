@@ -1,27 +1,40 @@
 import click
 
-import fishsim.src.run_merfish
-import fishsim.src.subdivide
+import fishsim.run
 
 
 @click.command(context_settings={"max_content_width": 120}, name="simulate")
+@click.option(
+    "-b",
+    "--codebook-file",
+    required=True,
+    type=click.Path(exists=True),
+    help="Path to the codebook file in TSV format.",
+)
 @click.option(
     "-c",
     "--config-file",
     required=True,
     type=click.Path(exists=True),
-    help="Path to the configuration file in YAML format.",
+    help="Path to the simulation configuration file in YAML format.",
 )
 @click.option(
-    "-o",
-    "--output-dir-name",
+    "-d",
+    "--data-org-file",
+    required=True,
+    type=click.Path(exists=True),
+    help="Path to the data organisation file in TSV format.",
+)
+@click.option(
+    "-i",
+    "--img-file",
     required=True,
     type=click.Path(),
-    help="Define the name of the synethic data directory",
+    help="Path to file to save the stacked images in.",
 )
 def simulate(**kwargs):
     """Generate synthetic data according to merFISH barcoding scheme."""
-    fishsim.src.run_merfish(**kwargs)
+    fishsim.run.simulate(**kwargs)
 
 
 @click.group(name="fishsim")
@@ -29,4 +42,4 @@ def main():
     pass
 
 
-main.add_command(run_merfish)
+main.add_command(simulate)
