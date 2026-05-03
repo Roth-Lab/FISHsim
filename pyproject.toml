@@ -32,6 +32,7 @@ line-length = 120
 py_version = 312
 from_first = true
 lines_between_types = 1
+line_length = 120
 
 [project.scripts]
 fishsim = "fishsim.cli:main"

@@ -10,8 +10,7 @@ from fishsim.codebook import Codebook
 from fishsim.data_organisation import DataOrganisation
 from fishsim.fov import FieldOfView, ProbedFieldOfView
 from fishsim.psf import _process_psf
-from fishsim.simulate import (BackgroundSimulator, CameraSimulator,
-                              PhotonSimulator)
+from fishsim.simulate import BackgroundSimulator, CameraSimulator, PhotonSimulator
 
 psf_file = "../fishsim/resources/psf.mat"
 
