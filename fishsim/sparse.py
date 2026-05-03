@@ -1,6 +1,8 @@
 import math
-import numpy as np
+
 from scipy import interpolate
+
+import numpy as np
 
 
 class SparseMatrix3D:

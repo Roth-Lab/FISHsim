@@ -1,7 +1,9 @@
 import math
-import numpy as np
 import sys
-sys.path.insert(1, '/Users/luna/Documents/GitHub/anglerfish_simulator/src/ellipsoid.py')
+
+import numpy as np
+
+sys.path.insert(1, "/Users/luna/Documents/GitHub/anglerfish_simulator/src/ellipsoid.py")
 from ellipsoid import Ellipsoid
 
 

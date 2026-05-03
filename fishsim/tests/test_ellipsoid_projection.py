@@ -1,6 +1,7 @@
+from ellipsoid import Ellipsoid
+
 import numpy as np
 import numpy.linalg as LA
-from ellipsoid import Ellipsoid
 
 
 def test_ellipsoid_projection():

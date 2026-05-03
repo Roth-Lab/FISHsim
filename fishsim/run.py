@@ -7,7 +7,8 @@ from fishsim.codebook import Codebook
 from fishsim.data_organisation import DataOrganisation
 from fishsim.fov import FieldOfView, ProbedFieldOfView
 from fishsim.psf import load_psf
-from fishsim.simulate import BackgroundSimulator, CameraSimulator, ImageSimulator, PhotonSimulator
+from fishsim.simulate import (BackgroundSimulator, CameraSimulator,
+                              ImageSimulator, PhotonSimulator)
 
 
 def simulate(codebook_file, config_file, data_org_file, img_file):

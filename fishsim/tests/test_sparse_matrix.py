@@ -1,4 +1,5 @@
 import time
+
 import numpy as np
 import scipy.signal
 import sparse
@@ -6,9 +7,7 @@ import sparse
 
 def test_sparse_convolution():
     row, col, z = 100, 100, 101  # 3d matrix dimensions
-    indexes = np.floor(
-        np.random.uniform(0, 1, size=(1000, 3)) * np.array([row, col, z])
-    ).astype(int)
+    indexes = np.floor(np.random.uniform(0, 1, size=(1000, 3)) * np.array([row, col, z])).astype(int)
     data = np.random.uniform(0, 1, size=1000)
 
     matrix = np.zeros((row, col, z))

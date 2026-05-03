@@ -1,7 +1,7 @@
 import numpy as np
 
-from fishsim.sparse import sparse_convolve2d, sparse_convolve3d, SparseMatrix3D
-from fishsim.utils import make_gaussian_2d, TruncatedNormal
+from fishsim.sparse import SparseMatrix3D, sparse_convolve2d, sparse_convolve3d
+from fishsim.utils import TruncatedNormal, make_gaussian_2d
 
 
 class ImageSimulator(object):

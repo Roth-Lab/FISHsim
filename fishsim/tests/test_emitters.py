@@ -1,5 +1,5 @@
-import numpy as np
 import generate_emitters
+import numpy as np
 
 
 def test_emitter_position_bounds():
@@ -8,9 +8,7 @@ def test_emitter_position_bounds():
     z_dim = (0, 100)
 
     # generate_emitters.cell_emitter_position(x_dim, y_dim, z_dim, 1000, 10, , True)
-    emitter_positions = generate_emitters.random_emitter_position(
-        x_dim, y_dim, z_dim, 10000
-    )
+    emitter_positions = generate_emitters.random_emitter_position(x_dim, y_dim, z_dim, 10000)
 
     print(emitter_positions)
     is_negative = False
@@ -29,9 +27,7 @@ def test_cell_emitter_position_bounds():
 
     cell_axes_bounds = {"a": [30, 40], "b": [20, 30], "c": [20, 30]}
 
-    emitter_positions = generate_emitters.cell_emitter_position(
-        x_dim, y_dim, z_dim, 10000, 10, cell_axes_bounds, True
-    )
+    emitter_positions = generate_emitters.cell_emitter_position(x_dim, y_dim, z_dim, 10000, 10, cell_axes_bounds, True)
     print(emitter_positions)
     is_negative = False
     for pos in emitter_positions:

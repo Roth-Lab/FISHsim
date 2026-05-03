@@ -1,10 +1,10 @@
-import numpy as np
-import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 from scipy.spatial.transform import Rotation as R
 
-import ellipsoid
 import cells
+import ellipsoid
+import matplotlib.pyplot as plt
+import numpy as np
 
 # [33.55934571 65.68648844 50.00579853]
 # [ 87.60376451  57.50128419 520.75555253]
@@ -18,9 +18,7 @@ import cells
 #     [0, 0, 100], cell_axes_bounds, [50, 10, 60], nucleus_size=0.3
 # )
 cell_axes_bounds = {"a": [33, 33], "b": [65, 65], "c": [50, 50]}
-cell = cells.EllipsoidCell(
-    [0, 0, 100], cell_axes_bounds, [180 - 169.1, 31, 180 - 48.4], nucleus_size=0.3
-)
+cell = cells.EllipsoidCell([0, 0, 100], cell_axes_bounds, [180 - 169.1, 31, 180 - 48.4], nucleus_size=0.3)
 # r = R.from_matrix(
 #     [
 #         [0.56654561, -0.79989604, -0.1979707],
@@ -58,4 +56,3 @@ ax3 = fig.add_subplot(nrow, ncol, 3)
 ax3.imshow(img)
 
 plt.show()
-

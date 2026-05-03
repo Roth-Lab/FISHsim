@@ -1,9 +1,10 @@
+from scipy import interpolate
+from simulation import Simulator
+from utils import BASE_PROJECT_DIR
+
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy
-import matplotlib.pyplot as plt
-from scipy import interpolate
-from utils import BASE_PROJECT_DIR
-from simulation import Simulator
 
 psf_path = BASE_PROJECT_DIR / "resources/PSF.mat"
 mat = scipy.io.loadmat(str(psf_path))
