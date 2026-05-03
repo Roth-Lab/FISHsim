@@ -10,7 +10,9 @@ from fishsim.psf import load_psf
 from fishsim.simulate import BackgroundSimulator, CameraSimulator, ImageSimulator, PhotonSimulator
 
 
-def simulate(codebook_file, config_file, data_org_file, img_file):
+def simulate(codebook_file, config_file, data_org_file, img_file, seed=None):
+    rng = np.random.default_rng(seed)
+
     with open(config_file, "r") as fh:
         config = yaml.safe_load(fh)
 
@@ -26,12 +28,18 @@ def simulate(codebook_file, config_file, data_org_file, img_file):
 
     config_cell = config_sim["cells"]
 
-    fov = FieldOfView(boundary_box, config_cell["axes"], config_cell["num_cells"])
+    fov = FieldOfView(
+        boundary_box,
+        config_cell["axes"],
+        config_cell["num_cells"],
+        rng,
+    )
 
     probed_fov = ProbedFieldOfView(
         codebook,
         fov,
         config_sim["num_emitters"],
+        rng,
         bit_add_prob=config_sim["bit_add_prob"],
         bit_drop_prob=config_sim["bit_drop_prob"],
         sim_nucleus=config_cell["nucleus"],
@@ -41,6 +49,7 @@ def simulate(codebook_file, config_file, data_org_file, img_file):
     sim_background = BackgroundSimulator(
         config_sim["bg_sampling_prob"],
         config_sim["photon_counts"],
+        rng,
         config_sim["signal_to_cell_ratio"],
     )
 
@@ -58,6 +67,7 @@ def simulate(codebook_file, config_file, data_org_file, img_file):
         config_camera["gain"],
         config_camera["quantum_efficiency"],
         config_camera["read_noise"],
+        rng,
     )
 
     sim = ImageSimulator(data_org, sim_background, sim_camera, sim_photon)

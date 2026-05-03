@@ -39,14 +39,16 @@ class ImageSimulator(object):
 class BackgroundSimulator(object):
     """Simulate image background"""
 
-    def __init__(self, bg_sampling_prob, photon_counts, signal_to_cell_ratio):
+    def __init__(self, bg_sampling_prob, photon_counts, rng, signal_to_cell_ratio):
         self.bg_sampling_prob = bg_sampling_prob
 
         self.photon_counts = photon_counts
 
+        self.rng = rng
+
         self.signal_to_cell_ratio = signal_to_cell_ratio
 
-        self.cell_bg_to_global_bg_ratio = [np.random.uniform(1.15, 2.5) for _ in photon_counts]
+        self.cell_bg_to_global_bg_ratio = [self.rng.uniform(1.15, 2.5) for _ in photon_counts]
 
     def get_img(self, fov, img_round):
         cell_background_level = np.floor(self.photon_counts[img_round] / self.signal_to_cell_ratio[img_round])
@@ -93,11 +95,11 @@ class BackgroundSimulator(object):
         # Create a sparse matrix that represents the background
         shape = (fov.y_size + kernel_shape[0] - 1, fov.x_size + kernel_shape[1] - 1)
 
-        cnt = np.random.binomial(shape[0] * shape[1], self.bg_sampling_prob)
+        cnt = self.rng.binomial(shape[0] * shape[1], self.bg_sampling_prob)
 
-        r = np.random.randint(0, shape[0], size=(cnt, 1))
+        r = self.rng.integers(0, shape[0], size=(cnt, 1))
 
-        c = np.random.randint(0, shape[1], size=(cnt, 1))
+        c = self.rng.integers(0, shape[1], size=(cnt, 1))
 
         background_sparse = SparseMatrix3D(np.ones((cnt, 1)), np.hstack((r, c)), shape, subpixel=False)
 
@@ -168,7 +170,7 @@ class CameraSimulator(object):
     """Simulate camera capture"""
 
     def __init__(
-        self, bias, dark_current, exposure_time, gain, quantum_efficiency, read_noise, threshold_dark_current=True
+        self, bias, dark_current, exposure_time, gain, quantum_efficiency, read_noise, rng, threshold_dark_current=True
     ):
         self.bias = bias
 
@@ -182,6 +184,8 @@ class CameraSimulator(object):
 
         self.read_noise = read_noise
 
+        self.rng = rng
+
         self.threshold_dark_current = threshold_dark_current
 
     def capture_img(self, channel, img):
@@ -191,12 +195,12 @@ class CameraSimulator(object):
             low_signal_mask = img < 10
 
             # Add dark current noise as a Poisson process (before QE and shot noise)
-            dark_current_noise = np.random.poisson(mean_dark_electrons, size=img.shape)
+            dark_current_noise = self.rng.poisson(mean_dark_electrons, size=img.shape)
 
             img[low_signal_mask] += dark_current_noise[low_signal_mask]
 
         else:
-            dark_current_noise = np.random.poisson(mean_dark_electrons, size=img.shape)
+            dark_current_noise = self.rng.poisson(mean_dark_electrons, size=img.shape)
 
             img += dark_current_noise
 
@@ -204,11 +208,11 @@ class CameraSimulator(object):
         img *= self.quantum_efficiency[channel]
 
         # Add photon shot noise
-        img = np.random.poisson(img).astype(float)
+        img = self.rng.poisson(img).astype(float)
 
         # Add read noise
         # img += np.clip(np.random.normal(0, self.read_noise, size=img.shape), a_min=0, a_max=None)
 
-        img += np.random.lognormal(0, self.read_noise, size=img.shape)
+        img += self.rng.lognormal(0, self.read_noise, size=img.shape)
 
         return (img / self.gain) + self.bias

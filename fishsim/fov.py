@@ -4,7 +4,9 @@ from fishsim.cells import EllipsoidCell
 
 
 class FieldOfView(object):
-    def __init__(self, boundary_box, cell_axes_bounds, num_cells):
+    def __init__(self, boundary_box, cell_axes_bounds, num_cells, rng):
+        self.rng = rng
+
         self.boundary_box = boundary_box
 
         self._init_cells(cell_axes_bounds, num_cells)
@@ -27,9 +29,9 @@ class FieldOfView(object):
         while len(self.cells) < num_cells:
             # Generate center position for cells
             cell_pos = [
-                np.random.uniform(*self.boundary_box["x"]),
-                np.random.uniform(*self.boundary_box["y"]),
-                np.random.uniform(*self.boundary_box["z"]),
+                self.rng.uniform(*self.boundary_box["x"]),
+                self.rng.uniform(*self.boundary_box["y"]),
+                self.rng.uniform(*self.boundary_box["z"]),
             ]
 
             current_cell = EllipsoidCell(cell_axes_bounds, cell_pos)
@@ -46,10 +48,14 @@ class FieldOfView(object):
 
 
 class ProbedFieldOfView(object):
-    def __init__(self, codebook, fov, num_emitters, bit_add_prob=0, bit_drop_prob=0, sim_nucleus=True, subpixel=True):
+    def __init__(
+        self, codebook, fov, num_emitters, rng, bit_add_prob=0, bit_drop_prob=0, sim_nucleus=True, subpixel=True
+    ):
         self.codebook = codebook
 
         self.fov = fov
+
+        self.rng = rng
 
         self._init_emitters(num_emitters, sim_nucleus, subpixel)
 
@@ -88,18 +94,18 @@ class ProbedFieldOfView(object):
         return np.array(targets)
 
     def _init_emitters(self, num_emitters, sim_nucleus, subpixel):
-        p = np.random.dirichlet([c.volume for c in self.cells])
+        p = self.rng.dirichlet([c.volume for c in self.cells])
 
-        cell_emitter_count = np.random.multinomial(num_emitters, p)
+        cell_emitter_count = self.rng.multinomial(num_emitters, p)
 
         for i, cell in enumerate(self.cells):
             emitter_positions = []
 
             emitter_target_ids = []
 
-            p = np.random.dirichlet(self.codebook.target_dist + 1e-6)
+            p = self.rng.dirichlet(self.codebook.target_dist + 1e-6)
 
-            target_emitter_counts = np.random.multinomial(cell_emitter_count[i], p)
+            target_emitter_counts = self.rng.multinomial(cell_emitter_count[i], p)
 
             for t in range(self.codebook.num_targets):
                 emitter_positions.extend(
@@ -127,13 +133,13 @@ class ProbedFieldOfView(object):
         for i in self.emitter_target_ids:
             b = self.codebook.get_barcode(i).copy()
 
-            if np.random.rand() < bit_add_prob:
-                idx = np.random.choice(np.where(b == 0)[0])
+            if self.rng.random() < bit_add_prob:
+                idx = self.rng.choice(np.where(b == 0)[0])
 
                 b[idx] = 1
 
-            elif np.random.rand() < bit_drop_prob:
-                idx = np.random.choice(np.where(b == 1)[0])
+            elif self.rng.random() < bit_drop_prob:
+                idx = self.rng.choice(np.where(b == 1)[0])
 
                 b[idx] = 0
 

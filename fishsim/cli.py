@@ -32,6 +32,12 @@ import fishsim.run
     type=click.Path(),
     help="Path to file to save the stacked images in.",
 )
+@click.option(
+    "--seed",
+    default=None,
+    type=int,
+    help="Random seed",
+)
 def simulate(**kwargs):
     """Generate synthetic data according to merFISH barcoding scheme."""
     fishsim.run.simulate(**kwargs)
