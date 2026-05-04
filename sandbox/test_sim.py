@@ -10,6 +10,8 @@ from fishsim.fov import FieldOfView, ProbedFieldOfView
 from fishsim.psf import _process_psf
 from fishsim.simulate import BackgroundSimulator, CameraSimulator, PhotonSimulator
 
+rng = np.random.default_rng(0)
+
 psf_file = "../fishsim/resources/psf.mat"
 
 psf = np.array(scipy.io.loadmat(psf_file)["ans"])
@@ -37,7 +39,7 @@ boundary_box_psf["z"] = (
     boundary_box_psf["z"][1] + np.floor(psf.shape[2] // 2),
 )
 
-fov = FieldOfView(boundary_box_psf, cell_axes_bounds, 15)
+fov = FieldOfView(boundary_box_psf, cell_axes_bounds, 15, rng)
 
 codebook_df = pd.DataFrame(
     [
@@ -53,9 +55,10 @@ codebook = Codebook(codebook_df)
 probed_fov = ProbedFieldOfView(
     codebook,
     fov,
-    200,
-    bit_add_prob=0.0,
-    bit_drop_prob=0.0,
+    5000,
+    rng,
+    bit_add_prob=0.1,
+    bit_drop_prob=0.1,
     sim_nucleus=False,
     subpixel=False,
 )
@@ -77,9 +80,27 @@ print(data_org.get_channel("bit_2"))
 
 print(data_org.get_round("bit_3"))
 
+true_barcodes = np.array([codebook.get_barcode(t) for t in probed_fov.emitter_target_ids])
+
+diff_barcodes = np.sum(probed_fov.emitter_barcodes - true_barcodes, axis=1)
+
+df = pd.DataFrame(
+    {
+        "cell_id": probed_fov.emitter_cell_ids,
+        "target": probed_fov.emitter_targets,
+        "x": probed_fov.emitter_positions[:, 1],
+        "y": probed_fov.emitter_positions[:, 0],
+        "z": probed_fov.emitter_positions[:, 2],
+        "bit_add": (diff_barcodes == -1).astype(int),
+        "bit_drop": (diff_barcodes == 1).astype(int),
+    }
+)
+
+print(df)
+
 photon_counts = 20000 * np.ones(data_org.num_rounds)
 
-sim_bg = BackgroundSimulator(0.00, photon_counts, 11 * np.ones(data_org.num_rounds))
+sim_bg = BackgroundSimulator(0.00, photon_counts, rng, 11 * np.ones(data_org.num_rounds))
 
 img = sim_bg.get_img(fov, 0)
 
@@ -115,6 +136,7 @@ sim_camera = CameraSimulator(
     1.33,
     {"650": 0.89, "750": 0.71},
     1,
+    rng,
 )
 
 img = sim_camera.capture_img(data_org.get_channel("bit_1"), img)

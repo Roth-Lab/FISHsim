@@ -26,6 +26,13 @@ import fishsim.run
     help="Path to the data organisation file in TSV format.",
 )
 @click.option(
+    "-e",
+    "--emitter-file",
+    required=True,
+    type=click.Path(),
+    help="Path to file to save the emitter file information to.",
+)
+@click.option(
     "-i",
     "--img-file",
     required=True,

@@ -10,7 +10,7 @@ from fishsim.psf import load_psf
 from fishsim.simulate import BackgroundSimulator, CameraSimulator, ImageSimulator, PhotonSimulator
 
 
-def simulate(codebook_file, config_file, data_org_file, img_file, seed=None):
+def simulate(codebook_file, config_file, data_org_file, emitter_file, img_file, seed=None):
     rng = np.random.default_rng(seed)
 
     with open(config_file, "r") as fh:
@@ -80,6 +80,24 @@ def simulate(codebook_file, config_file, data_org_file, img_file, seed=None):
     imgs = np.array(imgs, dtype=np.uint16)
 
     skimage.io.imsave(img_file, imgs)
+
+    true_barcodes = np.array([codebook.get_barcode(t) for t in probed_fov.emitter_target_ids])
+
+    diff_barcodes = np.sum(probed_fov.emitter_barcodes - true_barcodes, axis=1)
+
+    df = pd.DataFrame(
+        {
+            "cell_id": probed_fov.emitter_cell_ids,
+            "target": probed_fov.emitter_targets,
+            "x": probed_fov.emitter_positions[:, 1],
+            "y": probed_fov.emitter_positions[:, 0],
+            "z": probed_fov.emitter_positions[:, 2],
+            "bit_add": (diff_barcodes == -1).astype(int),
+            "bit_drop": (diff_barcodes == 1).astype(int),
+        }
+    )
+
+    df.to_csv(emitter_file, index=False, sep="\t")
 
 
 def _load_boundary_box(config_sim, psf):
