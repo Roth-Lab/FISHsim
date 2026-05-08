@@ -50,6 +50,8 @@ class FieldOfView(object):
                     break
 
             if not overlap:
+                attempt = 0
+
                 self.cells.append(current_cell)
 
 
