@@ -40,6 +40,11 @@ import fishsim.run
     help="Path to file to save the stacked images in.",
 )
 @click.option(
+    "--dist-file",
+    type=click.Path(),
+    help="Path to file to specifying distribution of gene expression.",
+)
+@click.option(
     "--seed",
     default=None,
     type=int,

@@ -10,7 +10,7 @@ from fishsim.psf import load_psf
 from fishsim.simulate import BackgroundSimulator, CameraSimulator, ImageSimulator, PhotonSimulator
 
 
-def simulate(codebook_file, config_file, data_org_file, emitter_file, img_file, seed=None):
+def simulate(codebook_file, config_file, data_org_file, emitter_file, img_file, dist_file=None, seed=None):
     rng = np.random.default_rng(seed)
 
     with open(config_file, "r") as fh:
@@ -20,7 +20,7 @@ def simulate(codebook_file, config_file, data_org_file, emitter_file, img_file, 
 
     config_sim = config["simulation"]
 
-    codebook, data_org = _load_codebook_data_org(codebook_file, data_org_file)
+    codebook, data_org = _load_codebook_data_org(codebook_file, data_org_file, dist_file=dist_file)
 
     psf = load_psf()
 
@@ -111,7 +111,7 @@ def _load_boundary_box(config_sim, psf):
     return boundary_box
 
 
-def _load_codebook_data_org(codebook_file, data_org_file):
+def _load_codebook_data_org(codebook_file, data_org_file, dist_file=None):
     codebook_df = pd.read_csv(codebook_file, index_col="target", sep="\t")
 
     data_org_df = pd.read_csv(data_org_file, converters={"bit_number": int}, sep="\t")
@@ -120,6 +120,12 @@ def _load_codebook_data_org(codebook_file, data_org_file):
 
     codebook_df = codebook_df[data_org.bit_ids]
 
-    codebook = Codebook(codebook_df)
+    if dist_file is not None:
+        dist_df = pd.read_csv(dist_file, index_col="target", sep="\t")
+
+    else:
+        dist_df = None
+
+    codebook = Codebook(codebook_df, dist_df=dist_df)
 
     return codebook, data_org
