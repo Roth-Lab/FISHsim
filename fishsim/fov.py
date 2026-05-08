@@ -23,10 +23,16 @@ class FieldOfView(object):
     def z_size(self):
         return self.boundary_box["z"][1] - self.boundary_box["z"][0]
 
-    def _init_cells(self, cell_axes_bounds, num_cells):
+    def _init_cells(self, cell_axes_bounds, num_cells, max_attempt_multiple=10):
         self.cells = []
 
-        while len(self.cells) < num_cells:
+        attempt = 0
+
+        max_attempts = max_attempt_multiple * num_cells
+
+        while (len(self.cells) < num_cells) and (attempt < max_attempts):
+            attempt += 1
+
             # Generate center position for cells
             cell_pos = [
                 self.rng.uniform(*self.boundary_box["x"]),
