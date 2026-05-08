@@ -147,6 +147,8 @@ class Ellipsoid(object):
             )
 
         def is_valid(candidate, accepted_points):
+            if min_dist <= 0:
+                return True
             cx = int(candidate[0])
             cy = int(candidate[1])
             for pt in accepted_points:
