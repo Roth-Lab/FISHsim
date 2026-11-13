@@ -7,15 +7,9 @@ We recommend using conda to set up a virtual environment.
 
 ```
 conda env create -f environments.yml
+conda activate fishsim
+pip install -e .
 ```
-
-
-
-## Configuring the Program Parameters
-
-Update `src/config.yml` to set the parameters for the simulator.
-
-Some parameters can also be set using the Command Line Interface. This overrides the settings defined in the `config.yml` file for those specific parameters
 
 
 ## Program Usage
@@ -23,22 +17,9 @@ Some parameters can also be set using the Command Line Interface. This overrides
 ## Running as an installed package
 If you have installed fishsim as a package, then
 
-1. Update the parameters in resources\configs\config.yml
-
-2. Run in command line to simulate images. For dataset-name, no need to include 'merfish_' in the beginning
+1. Run in command line to simulate images.
 ```
-fishsim run_merfish --config-file .\resources\config_serval_experiment_default.yml --output-dir-name serval_experiment_default
+fishsim simulate --config-file examples/config_clean.yaml --codebook-file examples/codebook.tsv --data-org-file examples/data_org.tsv --emitter-file outputs/clean/emitters.tsv --img-file outputs/clean/images.tif --seed 42
 ```
-3. If you wish to subdivide. For dataset-name, no need to include 'merfish_' in the beginning
-```
-fishsim subdivide --dataset-name '' --total-fov 10
-```
-
-
 
 > **Note:** If the distribution column is provided in the specified codebook, the number_emitter specified in the CLI or the config file is overridden.
-
-
-## Running the Unit Tests
-
-Run *pytest* in the `src` directory the run the unit tests associated with the program
