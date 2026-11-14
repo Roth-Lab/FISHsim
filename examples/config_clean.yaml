@@ -30,6 +30,8 @@ simulation:
   bit_add_prob: 0
   # Probability of a bit being dropped (dropout)
   bit_drop_prob: 0
+  # Minimum Euclidean distance for emitters to be apart from each other
+  min_dist: 6
   # Number of emitters
   num_emitters: 5000
   # Per round photon counts for emitters
