@@ -47,6 +47,7 @@ def simulate(codebook_file, config_file, data_org_file, emitter_file, img_file, 
         rng,
         bit_add_prob=config_sim["bit_add_prob"],
         bit_drop_prob=config_sim["bit_drop_prob"],
+        min_dist=config_sim["min_dist"],
         sim_nucleus=config_cell["nucleus"],
         subpixel=config_sim["subpixel"],
     )

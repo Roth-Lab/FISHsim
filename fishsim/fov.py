@@ -57,13 +57,15 @@ class FieldOfView(object):
 
 class ProbedFieldOfView(object):
     def __init__(
-        self, codebook, fov, num_emitters, rng, bit_add_prob=0, bit_drop_prob=0, sim_nucleus=True, subpixel=True
+        self, codebook, fov, num_emitters, rng, bit_add_prob=0, bit_drop_prob=0, min_dist=0, sim_nucleus=True, subpixel=True
     ):
         self.codebook = codebook
 
         self.fov = fov
 
         self.rng = rng
+        
+        self.min_dist = min_dist
 
         self._init_emitters(num_emitters, sim_nucleus, subpixel)
 
@@ -120,6 +122,7 @@ class ProbedFieldOfView(object):
                     cell.generate_emitters(
                         self.fov.boundary_box,
                         target_emitter_counts[t],
+                        min_dist=self.min_dist,
                         sim_nucleus=sim_nucleus,
                     )
                 )
