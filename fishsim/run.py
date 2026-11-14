@@ -11,7 +11,12 @@ from fishsim.simulate import BackgroundSimulator, CameraSimulator, ImageSimulato
 
 
 def simulate(codebook_file, config_file, data_org_file, emitter_file, img_file, dist_file=None, seed=None):
+    # Note this is used in fov.py
     rng = np.random.default_rng(seed)
+
+    # Note this is used in ellipsoid.py by np.random.uniform()
+    if seed is not None:
+        np.random.seed(seed)
 
     with open(config_file, "r") as fh:
         config = yaml.safe_load(fh)
