@@ -106,7 +106,7 @@ class EllipsoidCell(Cell):
         """
         return self.shape.check_overlap(x.shape)
 
-    def generate_emitters(self, boundary_box, num_emitters, min_dist=0, sim_nucleus=True):
+    def generate_emitters(self, boundary_box, num_emitters, min_dist=0, sim_nucleus=True, accepted_points=None):
         """Randomly generates the specified number of emitters within the volume of the cell
 
         Args:
@@ -123,7 +123,7 @@ class EllipsoidCell(Cell):
             num_nuc_emitters = np.floor((nuc_vol / self.volume) * num_emitters * self.nucelus_emitter_density)
 
             emitters.extend(
-                self.shape.generate_random_points(boundary_box, [0, self.nuc_size], min_dist=min_dist, num_points=num_nuc_emitters)
+                self.shape.generate_random_points(boundary_box, [0, self.nuc_size], min_dist=min_dist, num_points=num_nuc_emitters, accepted_points=accepted_points)
             )
 
         else:
@@ -133,7 +133,7 @@ class EllipsoidCell(Cell):
         num_cyto_emitters = num_emitters - num_nuc_emitters
 
         emitters.extend(
-            self.shape.generate_random_points(boundary_box, [self.nuc_size, 1], min_dist=min_dist, num_points=num_cyto_emitters)
+            self.shape.generate_random_points(boundary_box, [self.nuc_size, 1], min_dist=min_dist, num_points=num_cyto_emitters, accepted_points=accepted_points)
         )
 
         return np.array(emitters)

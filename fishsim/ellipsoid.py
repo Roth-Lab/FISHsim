@@ -123,7 +123,7 @@ class Ellipsoid(object):
             or (n[0] == 0 and n[1] == 0 and n[3] < 0 and n[4] > 0)
         )
 
-    def generate_random_points(self, boundary_box, radial_extent, min_dist=0, num_points=1):
+    def generate_random_points(self, boundary_box, radial_extent, min_dist=0, num_points=1, accepted_points=None):
         """Generates a random point within the volume of the nucleus.
             One can specify which section of the nucleus to sample from by specifying radial extent
 
@@ -159,6 +159,11 @@ class Ellipsoid(object):
                     return False
             return True
 
+        # A list is a mutable object, we collect it at a global scale across all cells' emitters
+        # so that we can use it check each cell's generated coords.
+        if accepted_points is None:
+            accepted_points = []
+    
         points = []
 
         while len(points) < num_points:
@@ -186,8 +191,9 @@ class Ellipsoid(object):
 
             coords = np.squeeze(coords)
 
-            if is_in_boundary_box(coords) and is_valid(coords, points):
+            if is_in_boundary_box(coords) and is_valid(coords, accepted_points):
                 points.append(coords)
+                accepted_points.append(coords) 
 
         return np.array(points)
 

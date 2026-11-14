@@ -107,7 +107,11 @@ class ProbedFieldOfView(object):
         p = self.rng.dirichlet([c.volume for c in self.cells])
 
         cell_emitter_count = self.rng.multinomial(num_emitters, p)
-
+    
+        # A list is a mutable object, we collect it at a global scale across all cells' emitters
+        # so that we can use it check each cell's generated coords.
+        accepted_points = []
+        
         for i, cell in enumerate(self.cells):
             emitter_positions = []
 
@@ -124,6 +128,7 @@ class ProbedFieldOfView(object):
                         target_emitter_counts[t],
                         min_dist=self.min_dist,
                         sim_nucleus=sim_nucleus,
+                        accepted_points=accepted_points,
                     )
                 )
 
